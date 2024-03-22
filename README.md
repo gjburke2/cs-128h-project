@@ -3,7 +3,9 @@
 ## Group Info
 
 Name: G&G
+
 Memeber Names: Griffin Burke and Gabriel Schwarz
+
 NetIDs: gjburke2 and gabe2
 
 ## Project Introduction

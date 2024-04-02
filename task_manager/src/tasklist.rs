@@ -2,7 +2,7 @@ use crate::task::Task;
 
 #[derive(Clone)]
 pub struct TaskList {
-    pub front: Option<Box<Task>>,
+    pub front: Option<Box<TaskNode>>,
     length: usize,
 }
 
@@ -25,18 +25,58 @@ impl TaskList {
         self.length
     }
     // Get task by index (input will be one-indexed) {
-    pub fn get_task(index: usize) -> Task {
-        Task::new("", 0, 0)
+    pub fn get_task(&mut self, index: usize) -> Task {
+        let mut i = 1;
+        let mut curr = &mut self.front;
+        while i < index {
+            curr = &mut curr.as_mut().unwrap().next;
+            i += 1;
+        }
+        return curr.as_ref().unwrap().task.clone();
     }
     // Add task (sorted by priority and time)
-    pub fn add(&mut self, task: TaskNode) {
-
+    pub fn add(&mut self, task: Task) {
+        // Consider when list is empty
+        if self.front.is_none() {
+            self.front = Some(Box::new(TaskNode::new(task)));
+            self.length += 1;
+            return;
+        }
+        let mut curr = &mut self.front;
+        // Consider when adding at the front
+        if curr.as_ref().unwrap().task.priority < task.priority || 
+                (curr.as_ref().unwrap().task.priority == task.priority && 
+                curr.as_ref().unwrap().task.seconds_left < task.seconds_left) {
+            let mut new_node = Some(Box::new(TaskNode::new(task)));
+            new_node.as_mut().unwrap().next = curr.take();
+            self.front = new_node;
+            self.length += 1;
+            return;
+        }
+        // Consider when list has one node
+        if curr.as_ref().unwrap().next.is_none() {
+            curr.as_mut().unwrap().next = Some(Box::new(TaskNode::new(task)));
+            self.length += 1;
+            return;
+        }
+        // Rest of the cases
+        while curr.as_ref().unwrap().next.is_some() && (
+            curr.as_ref().unwrap().next.as_ref().unwrap().task.priority > task.priority || 
+            (curr.as_ref().unwrap().next.as_ref().unwrap().task.priority == task.priority && curr.as_ref().unwrap().next.as_ref().unwrap().task.seconds_left > task.seconds_left)
+        ) {
+            curr = &mut curr.as_mut().unwrap().next;
+        }
+        let temp = &mut curr.as_mut().unwrap().next;
+        let mut new_node = Some(Box::new(TaskNode::new(task)));
+        new_node.as_mut().unwrap().next = temp.take();
+        curr.as_mut().unwrap().next = new_node.take();
+        self.length += 1;
     }
     // Take task away (by name)
     pub fn remove(&mut self, name: &str) {
 
     }
-
+    // TODO: User interactive save and load functions
 }
 
 impl TaskNode {

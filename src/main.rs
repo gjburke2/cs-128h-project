@@ -4,9 +4,8 @@ use crate::task::Task;
 use crate::tasklist::TaskList;
 
 fn main() {
-    println!("Hello, world!");
-    /* 
-    Informal debugging
+    // println!("Hello, world!");
+    // Informal debugging
 
     let mut task_list: TaskList = TaskList::new();
     let task1: Task = Task::new("Eating", 30 * 60, 3);
@@ -21,5 +20,10 @@ fn main() {
     println!("{}", task_list.get_task(2).name);
     println!("{}", task_list.get_task(3).name);
     println!("{}", task_list.len());
-    */
+
+    task_list.remove("Sleeping");
+
+    println!("{}", task_list.get_task(1).name);
+    println!("{}", task_list.get_task(2).name);
+    println!("{}", task_list.len());
 }

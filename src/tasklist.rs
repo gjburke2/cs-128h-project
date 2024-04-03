@@ -73,8 +73,29 @@ impl TaskList {
         self.length += 1;
     }
     // Take task away (by name)
-    pub fn remove(&mut self, name: &str) {
-
+    pub fn remove(&mut self, name: &str) -> Option<Task> {
+        if self.front.is_none() {
+            return None;
+        }
+        let mut index: u32 = 0;
+        let mut current = &mut self.front;
+        while current.clone().unwrap().next.is_some() {
+            if index == 0 && current.as_mut().unwrap().task.name == String::from(name) {
+                let task: Task = self.front.clone().unwrap().task;
+                self.front = self.front.clone().unwrap().next;
+                self.length -= 1;
+                return Some(task);
+            }
+            if current.clone().unwrap().next.unwrap().task.name == String::from(name) {
+                let task: Task = current.clone().unwrap().next.unwrap().task.clone();
+                current.as_mut().unwrap().next = current.clone().unwrap().next.unwrap().next;
+                self.length -= 1;
+                return Some(task);
+            }
+            index += 1;
+            current = &mut current.as_mut().unwrap().next;
+        }
+        return None;
     }
     // TODO: User interactive save and load functions
 }

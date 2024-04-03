@@ -21,7 +21,7 @@ fn main() {
     println!("{}", task_list.get_task(3).name);
     println!("{}", task_list.len());
 
-    task_list.remove("Sleeping");
+    task_list.remove("Computering");
 
     println!("{}", task_list.get_task(1).name);
     println!("{}", task_list.get_task(2).name);

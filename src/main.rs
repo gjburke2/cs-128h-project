@@ -2,12 +2,14 @@ mod task;
 mod tasklist;
 use crate::task::Task;
 use crate::tasklist::TaskList;
+use crate::tasklist::load;
+use crate::task::read;
 
 fn main() {
     // println!("Hello, world!");
     // Informal debugging
 
-    let mut task_list: TaskList = TaskList::new();
+    let mut task_list: TaskList = TaskList::new("Daily");
     let task1: Task = Task::new("Eating", 30 * 60, 3);
     let task2: Task = Task::new("Computering", 30 * 60, 2);
     let task3: Task = Task::new("Sleeping", 3 * 60 * 60, 3);
@@ -21,9 +23,16 @@ fn main() {
     println!("{}", task_list.get_task(3).name);
     println!("{}", task_list.len());
 
-    task_list.remove("Computering");
+    //task_list.remove("Computering");
 
     println!("{}", task_list.get_task(1).name);
     println!("{}", task_list.get_task(2).name);
     println!("{}", task_list.len());
+
+    let _ = task_list.save();
+    let mut new_task_list = load("Daily");
+
+    println!("{}", new_task_list.get_task(1).name);
+    println!("{}", new_task_list.get_task(2).name);
+    println!("{}", new_task_list.len());
 }

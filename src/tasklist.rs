@@ -1,9 +1,16 @@
 use crate::task::Task;
+use crate::task::read;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+use std::io::prelude::*;
+use std::io::LineWriter;
+use std::path::PathBuf;
 
 #[derive(Clone)]
 pub struct TaskList {
     pub front: Option<Box<TaskNode>>,
     length: usize,
+    name: String
 }
 
 #[derive(Clone)]
@@ -14,10 +21,11 @@ pub struct TaskNode {
 
 impl TaskList {
     // Initializer
-    pub fn new() -> Self {
+    pub fn new(input_name: &str) -> Self {
         TaskList {
             front: None,
             length: 0,
+            name: input_name.to_string()
         }
     }
     // Length getter
@@ -98,6 +106,41 @@ impl TaskList {
         return None;
     }
     // TODO: User interactive save and load functions
+    pub fn save(&mut self) -> std::io::Result<()>{
+        let mut path = PathBuf::new();
+        path.push("lists");
+        path.push(self.name.clone() + ".txt");
+        let file = File::create(path)?;
+        let mut file = LineWriter::new(file);
+        file.write_all(self.name.clone().as_bytes())?;
+        let mut ind = 1;
+        while ind <= self.length {
+            file.write_all(b"\n")?;
+            file.write_all(self.get_task(ind).write().as_bytes())?;
+            ind += 1;
+        }
+        let _ = file.flush();
+        Ok(())
+    }
+}
+
+
+pub fn load(task_name: &str) -> TaskList {
+    // Creating file
+    let mut path = PathBuf::new();
+    path.push("lists");
+    path.push(task_name.to_owned() + ".txt");
+    let file = File::open(path).expect("Can't open file");
+    let file = BufReader::new(file);
+    // Getting first two lines, creating object
+    let mut file_lines = file.lines().map(|line| line.expect("Can't read line"));
+    let name: String = file_lines.next().unwrap().parse().unwrap();
+    let mut new_task_list = TaskList::new(&name);
+    // Getting the rest
+    for line in file_lines {
+        new_task_list.add(read(&line));
+    }
+    return new_task_list;
 }
 
 impl TaskNode {
@@ -108,3 +151,5 @@ impl TaskNode {
         }
     }
 }
+
+

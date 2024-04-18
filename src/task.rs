@@ -20,7 +20,7 @@ impl TimeLeft {
 }
 impl Drop for TimeLeft {
     fn drop(&mut self) {
-        if (self.time_left <= 0) {
+        if self.time_left <= 0 {
             println!("Task Finished");
         }
         self.send_value(self.time_left);
@@ -68,7 +68,7 @@ impl Task {
             Err(_) => 0,
         };
         self.seconds_left = new_time;
-        if (self.seconds_left <= 0) {
+        if self.seconds_left <= 0 {
             self.completion_status = true;
         }
     }

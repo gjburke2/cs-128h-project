@@ -32,16 +32,25 @@ impl TaskList {
     pub fn len(&self) -> usize {
         self.length
     }
-    // Get task by index contant (input will be one-indexed) {
-        pub fn get_task(&mut self, index: usize) -> &mut Task {
-            let mut curr = &mut self.front;
-            let mut i = 1;
-            while i < index {
-                curr = &mut curr.as_mut().unwrap().next;
-                i += 1;
-            }
-            return &mut curr.as_mut().unwrap().task;
+    // Get mutable task by index contant (input will be one-indexed) {
+    pub fn get_mut_task(&mut self, index: usize) -> &mut Task {
+        let mut curr = &mut self.front;
+        let mut i = 1;
+        while i < index {
+            curr = &mut curr.as_mut().unwrap().next;
+            i += 1;
         }
+        return &mut curr.as_mut().unwrap().task;
+    }
+    pub fn get_task(&self, index: usize) -> Task {
+        let mut curr = &self.front;
+        let mut i = 1;
+        while i < index {
+            curr = &curr.as_ref().unwrap().next;
+            i += 1;
+        }
+        return curr.as_ref().unwrap().task.clone();
+    }
     // Add task (sorted by priority and time)
     pub fn add(&mut self, task: Task) {
         // Consider when list is empty

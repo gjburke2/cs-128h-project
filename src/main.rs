@@ -3,7 +3,6 @@ mod tasklist;
 use crate::task::Task;
 use crate::tasklist::TaskList;
 use crate::tasklist::load;
-use crate::task::read;
 use std::time::Duration;
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 use std::thread;
@@ -46,9 +45,9 @@ fn main() {
     println!("{}", task_list.get_task(3).seconds_left);
     
     // General form of starting and stopping tasks
-    // NOTE: CAN ONLY GET ONE TASK AT A TIME: Cannot overlap stopping and starting :)
+    // NOTE: CAN ONLY HAVE ONE MUTABLE GET AT A TIME (reuqires mutable reference of tasklist for each get_mut, so can only do one at a time)
     let should_stop = Arc::new(AtomicBool::new(false));
-    let first_task = task_list.get_task(1);
+    let first_task = task_list.get_mut_task(1);
     let (handle1, rx1) = first_task.start(should_stop.clone());
     thread::sleep(Duration::from_secs(15));
     first_task.stop(handle1, rx1, should_stop.clone());

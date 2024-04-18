@@ -32,16 +32,16 @@ impl TaskList {
     pub fn len(&self) -> usize {
         self.length
     }
-    // Get task by index (input will be one-indexed) {
-    pub fn get_task(&mut self, index: usize) -> Task {
-        let mut i = 1;
-        let mut curr = &mut self.front;
-        while i < index {
-            curr = &mut curr.as_mut().unwrap().next;
-            i += 1;
+    // Get task by index contant (input will be one-indexed) {
+        pub fn get_task(&mut self, index: usize) -> &mut Task {
+            let mut curr = &mut self.front;
+            let mut i = 1;
+            while i < index {
+                curr = &mut curr.as_mut().unwrap().next;
+                i += 1;
+            }
+            return &mut curr.as_mut().unwrap().task;
         }
-        return curr.as_ref().unwrap().task.clone();
-    }
     // Add task (sorted by priority and time)
     pub fn add(&mut self, task: Task) {
         // Consider when list is empty
@@ -105,7 +105,7 @@ impl TaskList {
         }
         return None;
     }
-    // TODO: User interactive save and load functions
+    // Saves to text file in lists folder
     pub fn save(&mut self) -> std::io::Result<()>{
         let mut path = PathBuf::new();
         path.push("lists");
@@ -124,7 +124,7 @@ impl TaskList {
     }
 }
 
-
+// Loads from list name
 pub fn load(task_name: &str) -> TaskList {
     // Creating file
     let mut path = PathBuf::new();

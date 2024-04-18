@@ -1,3 +1,32 @@
+use std::time::Duration;
+use std::thread;
+use std::thread::JoinHandle;
+use std::sync::{mpsc, mpsc::Receiver, mpsc::Sender };
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+
+pub struct TimeLeft {
+    pub sender: Sender<u32>,
+    pub time_left: u32,
+}
+
+impl TimeLeft {
+    fn new(time_left: u32) -> (Self, Receiver<u32>) {
+        let (sender, receiver) = mpsc::channel();
+        (TimeLeft{sender, time_left}, receiver)
+    }
+    fn send_value(&self, value: u32) {
+        self.sender.send(value).expect("Couldn't send value");
+    }
+}
+impl Drop for TimeLeft {
+    fn drop(&mut self) {
+        if (self.time_left <= 0) {
+            println!("Task Finished");
+        }
+        self.send_value(self.time_left);
+    }
+}
+
 #[derive(Clone)]
 pub struct Task {
     pub name: String,
@@ -17,12 +46,31 @@ impl Task {
         }
     }
     // Main functions (WIP, SIGNATURES MAY NEED MODIFYING)
-    // Start and stop may need to take in/return handles, recievers, etc if we want to multi-thread
-    pub fn start() {
-
+    // Start and stop are functions that only modify instance variables
+    // Thread handling must be done in main
+    pub fn start(&self, should_stop: Arc<AtomicBool>) -> (JoinHandle<()>, Receiver<u32>) {
+        let self_clone = self.clone();
+        let (time_left, receiver) = TimeLeft::new(self_clone.seconds_left);
+        let handle: JoinHandle<()> = thread::spawn( move || {
+            let mut time = time_left;
+            while time.time_left > 0 && !should_stop.load(Ordering::Relaxed) {
+                thread::sleep(Duration::from_secs(5));
+                time.time_left -= 5;
+            }
+        });
+        return (handle, receiver)
     }
-    pub fn stop() {
-
+    pub fn stop(&mut self, handle: JoinHandle<()>, receiver: Receiver<u32>, should_stop: Arc<AtomicBool>) {
+        should_stop.store(true, Ordering::Relaxed);
+        handle.join().unwrap();
+        let new_time = match receiver.recv() {
+            Ok(new_time) => new_time,
+            Err(_) => 0,
+        };
+        self.seconds_left = new_time;
+        if (self.seconds_left <= 0) {
+            self.completion_status = true;
+        }
     }
     // Write function for data storage
     pub fn write(&self) -> String{

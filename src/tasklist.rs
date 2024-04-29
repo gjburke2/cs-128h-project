@@ -5,6 +5,7 @@ use std::io::{BufRead, BufReader};
 use std::io::prelude::*;
 use std::io::LineWriter;
 use std::path::PathBuf;
+use dialoguer::Input;
 
 #[derive(Clone)]
 pub struct TaskList {
@@ -161,4 +162,79 @@ impl TaskNode {
     }
 }
 
+// Function for running the program (used in main) 
+pub fn run() {
+    let mut curr_list: TaskList = TaskList::new("Default");
+    loop {
+        // Get user's input
+        let input: String = Input::new().with_prompt("->").interact_text().expect("Has to be a string");
+        let args: Vec<&str> = input.trim().split(' ').collect();
+        // If there are no arguments handle and continue the loop
+        if args.len() == 0 {
+            println!("You must provide an argument.");
+            continue;
+        }
+        // Match the first word to certain functionalities
+        match args[0] {
+            "create" => {
+                if args.len() != 2 {
+                    println!("Too many or too few arguments.");
+                    continue;
+                }
+                curr_list = TaskList::new(args[1]);
+                task_creator(&mut curr_list);
+                curr_list.save();
+            },
+            "load" => {
+                if args.len() != 2 {
+                    println!("Too many or too few arguments.");
+                    continue;
+                }
+                curr_list = load(args[1]);
+            },
+            "help" => {
+                println!("List of commands and what they do:");
+                println!("The command 'load' followed by the name of a task list loads that task list from those previously created.");
+                println!("The command 'create' followed by a name creates a new task list under that name and saves it.");
+                println!("When a task list is loaded, the command 'start' followed by the name of a task commences the timer on that task.");
+                println!("When a task is started, the command 'pause' pauses the timer associated with that task.");
+                println!("Finally, the command 'exit' terminates the program.");
+            },
+            "exit" => {
+                break;
+            },
+            "start" => {
+                // STILL NEEDS TO BE IMPLEMENTED
+                continue;
+            },
+            "pause" => {
+                // STILL NEEDS TO BE IMPLEMENTED
+                continue;
+            },
+            _ => {
+                println!("Invalid command");
+            },
+        }
+    }
+}
 
+
+pub fn task_creator(task_list: &mut TaskList) {
+    println!("Enter command 'done' when you no longer wish to add tasks.");
+    loop {
+        let prompt: &str = "Enter a task name followed by the time it takes (integer in seconds) and a priority value (integer)->";
+        let input: String = Input::new().with_prompt(prompt).interact_text().expect("Has to be a string");
+        let args: Vec<&str> = input.trim().split(' ').collect();
+        if args[0] == "done" {
+            break;
+        }
+        if args.len() != 3 {
+            println!("Too many or too few arguments");
+            continue;
+        }
+        let time: u32 = args[1].to_string().parse().expect("Has to be an unsigned integer!!");
+        let priority: u32 = args[2].to_string().parse().expect("Has to be an unsigned integer!!");
+        let task: Task = Task::new(args[0], time, priority);
+        task_list.add(task);
+    }
+}

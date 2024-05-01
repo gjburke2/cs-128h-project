@@ -6,12 +6,17 @@ use std::io::prelude::*;
 use std::io::LineWriter;
 use std::path::PathBuf;
 use dialoguer::Input;
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+use std::thread::JoinHandle;
+use std::sync::mpsc::Receiver;
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct TaskList {
     pub front: Option<Box<TaskNode>>,
     length: usize,
     name: String
+    pub active_tasks: HashMap<String, (JoinHandle<()>, Arc<AtomicBool>, Receiver<u32>)>, // To keep track of running tasks
 }
 
 #[derive(Clone)]
@@ -27,6 +32,7 @@ impl TaskList {
             front: None,
             length: 0,
             name: input_name.to_string()
+            active_tasks: HashMap::new(), // Initialize the hashmap here
         }
     }
     // Length getter
@@ -204,14 +210,38 @@ pub fn run() {
                 break;
             },
             "start" => {
-                // STILL NEEDS TO BE IMPLEMENTED
-                continue;
+                if args.len() != 2 {
+                    println!("Please specify a task name to start.");
+                    continue;
+                }
+                let task_name = args[1];
+                if let Some(task) = curr_list.get_mut_task_by_name(task_name) {
+                    if !task.completion_status {
+                        let should_stop = Arc::new(AtomicBool::new(false));
+                        let (handle, receiver) = task.start(should_stop.clone());
+                        curr_list.active_tasks.insert(task_name.to_string(), (handle, should_stop, receiver));
+                        println!("Task '{}' has been started.", task_name);
+                    } else {
+                        println!("Task '{}' is either already completed or currently running.", task_name);
+                    }
+                } else {
+                    println!("Task '{}' not found.", task_name);
+                }
             },
             "pause" => {
-                // STILL NEEDS TO BE IMPLEMENTED
-                continue;
-            },
-            _ => {
+                if args.len() != 2 {
+                    println!("Please specify a task name to pause.");
+                    continue;
+                }
+                let task_name = args[1];
+                if let Some((handle, should_stop, receiver)) = curr_list.active_tasks.remove(task_name) {
+                    should_stop.store(true, Ordering::Relaxed);
+                    handle.join().expect("Failed to join task thread");
+                    if let Ok(time_left) = receiver.try_recv() {
+                        let task = curr_list.get_mut_task_by_name(task_name).unwrap();
+                        task.seconds_left = time_left;
+                        task.completion_status
+             {
                 println!("Invalid command");
             },
         }

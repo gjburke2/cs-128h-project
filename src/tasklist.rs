@@ -250,9 +250,10 @@ pub fn run() {
 
 
 pub fn task_creator(task_list: &mut TaskList) {
+    println!("To add a task, enter a name followed by the time it takes (integer in seconds) and a priority value (integer).")
     println!("Enter command 'done' when you no longer wish to add tasks.");
     loop {
-        let prompt: &str = "Enter a task name followed by the time it takes (integer in seconds) and a priority value (integer)->";
+        let prompt: &str = "->";
         let input: String = Input::new().with_prompt(prompt).interact_text().expect("Has to be a string");
         let args: Vec<&str> = input.trim().split(' ').collect();
         if args[0] == "done" {

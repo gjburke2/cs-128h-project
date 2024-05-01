@@ -4,9 +4,9 @@
 
 Name: G&G
 
-Memeber Names: Griffin Burke and Gabriel Schwarz
+Memeber Names: Griffin Burke and Gabriel Schwarz and Kaden Paris
 
-NetIDs: gjburke2 and gabe2
+NetIDs: gjburke2 and gabe2 and kadenp2
 
 ## Project Introduction
 

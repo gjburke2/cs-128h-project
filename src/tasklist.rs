@@ -70,6 +70,16 @@ impl TaskList {
         }
         return curr.as_ref().unwrap().task.clone();
     }
+    // Print all of the tasks along with their time
+    pub fn print_tasks(&self) {
+        let mut curr = &self.front;
+        let mut i = 0;
+        while i < self.length {
+            println!("Task: '{}', Remaining Time: {}", curr.as_ref().unwrap().task.name, curr.as_ref().unwrap().task.seconds_left);
+            curr = &curr.as_ref().unwrap().next;
+            i += 1;
+        }
+    }
     // Add task (sorted by priority and time)
     pub fn add(&mut self, task: Task) {
         // Consider when list is empty
@@ -216,12 +226,24 @@ pub fn run() {
                 println!("The command 'create' followed by a name creates a new task list under that name and saves it.");
                 println!("When a task list is loaded, the command 'start' followed by the name of a task and the time you want that task");
                 println!("to run for (integer in seconds) runs the task for that many seconds.");
+                println!("The command 'display' prints all the tasks along with their remaining time in the current task list.");
                 println!("Finally, the command 'exit' terminates the program.");
             },
             "exit" => {
                 break;
             },
+            "display" => {
+                if curr_list.name == "Default".to_string() {
+                    println!("A list must be loaded to display tasks.");
+                    continue;
+                }
+                curr_list.print_tasks();
+            },
             "start" => {
+                if curr_list.name == "Default".to_string() {
+                    println!("A list must be loaded to start a task.");
+                    continue;
+                }
                 if args.len() != 3 {
                     println!("Too many or too few arguments.");
                     continue;

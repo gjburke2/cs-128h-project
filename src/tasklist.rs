@@ -222,7 +222,7 @@ pub fn run() {
                 println!("The command 'load' followed by the name of a task list loads that task list from those previously created.");
                 println!("The command 'create' followed by a name creates a new task list under that name and saves it.");
                 println!("When a task list is loaded, the command 'start' followed by the name of a task and the time you want that task");
-                println!("to run for (integer in seconds) runs the task for that many seconds.");
+                println!("to run for (an integer multiple of five in seconds) runs the task for that many seconds.");
                 println!("The command 'display' prints all the tasks along with their remaining time in the current task list.");
                 println!("Finally, the command 'exit' terminates the program.");
             },

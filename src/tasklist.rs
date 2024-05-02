@@ -39,6 +39,16 @@ impl TaskList {
     pub fn len(&self) -> usize {
         self.length
     }
+    pub fn get_mut_task_by_name(&mut self, name: &str) -> Option<&mut Task> {
+        let mut current = &mut self.front;
+        while let Some(node) = current {
+            if node.task.name == name {
+                return Some(&mut node.task);
+            }
+            current = &mut node.next;
+        }
+        None
+    }
     // Get mutable task by index contant (input will be one-indexed) {
     pub fn get_mut_task(&mut self, index: usize) -> &mut Task {
         let mut curr = &mut self.front;

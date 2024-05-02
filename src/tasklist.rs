@@ -260,7 +260,7 @@ pub fn run() {
 
 
 pub fn task_creator(task_list: &mut TaskList) {
-    println!("To add a task, enter a name followed by the time it takes (integer in seconds) and a priority value (integer).")
+    println!("To add a task, enter a name followed by the time it takes (integer in seconds) and a priority value (integer).");
     println!("Enter command 'done' when you no longer wish to add tasks.");
     loop {
         let prompt: &str = "->";

@@ -8,15 +8,17 @@ use std::path::PathBuf;
 use dialoguer::Input;
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 use std::thread::JoinHandle;
-use std::sync::mpsc::Receiver;
 use std::collections::HashMap;
+use std::time::Duration;
+use std::thread;
+use std::sync::{mpsc, mpsc::Receiver};
 
 #[derive(Clone)]
 pub struct TaskList {
     pub front: Option<Box<TaskNode>>,
     length: usize,
     name: String,
-    pub active_tasks: HashMap<String, (JoinHandle<()>, Arc<AtomicBool>, Receiver<u32>)>, // To keep track of running tasks
+    // pub active_tasks: HashMap<String, (JoinHandle<()>, Arc<AtomicBool>, Receiver<u32>)>, // To keep track of running tasks
 }
 
 #[derive(Clone)]
@@ -32,7 +34,7 @@ impl TaskList {
             front: None,
             length: 0,
             name: input_name.to_string(),
-            active_tasks: HashMap::new(), // Initialize the hashmap here
+            // active_tasks: HashMap::new(), // Initialize the hashmap here
         }
     }
     // Length getter
@@ -212,53 +214,34 @@ pub fn run() {
                 println!("List of commands and what they do:");
                 println!("The command 'load' followed by the name of a task list loads that task list from those previously created.");
                 println!("The command 'create' followed by a name creates a new task list under that name and saves it.");
-                println!("When a task list is loaded, the command 'start' followed by the name of a task commences the timer on that task.");
-                println!("When a task is started, the command 'pause' pauses the timer associated with that task.");
+                println!("When a task list is loaded, the command 'start' followed by the name of a task and the time you want that task");
+                println!("to run for (integer in seconds) runs the task for that many seconds.");
                 println!("Finally, the command 'exit' terminates the program.");
             },
             "exit" => {
                 break;
             },
             "start" => {
-                if args.len() != 2 {
-                    println!("Please specify a task name to start.");
+                if args.len() != 3 {
+                    println!("Too many or too few arguments.");
                     continue;
                 }
-                let task_name = args[1];
-                if let Some(task) = curr_list.get_mut_task_by_name(task_name) {
-                    if !task.completion_status {
-                        let should_stop = Arc::new(AtomicBool::new(false));
-                        let (handle, receiver) = task.start(should_stop.clone());
-                        curr_list.active_tasks.insert(task_name.to_string(), (handle, should_stop, receiver));
-                        println!("Task '{}' has been started.", task_name);
-                    } else {
-                        println!("Task '{}' is either already completed or currently running.", task_name);
-                    }
-                } else {
-                    println!("Task '{}' not found.", task_name);
-                }
-            },
-            "pause" => {
-                if args.len() != 2 {
-                    println!("Please specify a task name to pause.");
+                let should_stop = Arc::new(AtomicBool::new(false));
+                let task = curr_list.get_mut_task_by_name(args[1]);
+                if task.is_none() {
+                    println!("Task is not in the list.");
                     continue;
                 }
-                let task_name = args[1];
-                if let Some((handle, should_stop, receiver)) = curr_list.active_tasks.remove(task_name) {
-                    should_stop.store(true, Ordering::Relaxed);
-                    handle.join().expect("Failed to join task thread");
-                    if let Ok(time_left) = receiver.try_recv() {
-                        if let Some(task) = curr_list.get_mut_task_by_name(task_name) {
-                            task.seconds_left = time_left;
-                            task.completion_status = time_left == 0;
-                            println!("Task '{}' has been paused with {} seconds left.", task_name, time_left);
-                        }
-                    } else {
-                        println!("No time left information available for task '{}'.", task_name);
-                    }
-                } else {
-                    println!("Task '{}' is not currently running.", task_name);
+                let task = task.unwrap();
+                if task.completion_status {
+                    println!("Task already completed.");
+                    continue;
                 }
+                let (handle1, rx1) = task.start(should_stop.clone());
+                let time: u64 = args[2].to_string().parse().expect("Has to be an unsigned integer!!");
+                thread::sleep(Duration::from_secs(time));
+                task.stop(handle1, rx1, should_stop.clone());
+                curr_list.save();
             },
             _ => {
                 println!("Invalid command.");

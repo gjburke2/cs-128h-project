@@ -28,7 +28,7 @@ fn main() {
     println!("{}", task_list.get_task(3).seconds_left);
     println!("{}", task_list.len());
 
-    task_list.remove("Computering");
+    /* task_list.remove("Computering");
 
     println!("{}", task_list.get_task(1).seconds_left);
     println!("{}", task_list.get_task(2).seconds_left);
@@ -36,7 +36,7 @@ fn main() {
     
 
     let _ = task_list.save();
-    let mut new_task_list = load("Daily");
+    let mut new_task_list = load("Daily"); */
     
 
     println!("Before:");
@@ -55,7 +55,7 @@ fn main() {
     println!("After:");
     println!("{}", task_list.get_task(1).completion_status);
     println!("{}", task_list.get_task(2).completion_status);
-    println!("{}", task_list.get_task(3).completion_status); */
+    println!("{}", task_list.get_task(3).completion_status);  */
     println!("Welcome to the task manager! \nType 'help' for a list of commands you might find useful!");
     // This command launches the program
     run();

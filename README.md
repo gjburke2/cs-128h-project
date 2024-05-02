@@ -2,7 +2,7 @@
 
 ## Group Info
 
-Name: G&G
+Name: GGK
 
 Memeber Names: Griffin Burke and Gabriel Schwarz and Kaden Paris
 

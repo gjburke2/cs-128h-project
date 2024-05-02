@@ -15,7 +15,7 @@ use std::collections::HashMap;
 pub struct TaskList {
     pub front: Option<Box<TaskNode>>,
     length: usize,
-    name: String
+    name: String,
     pub active_tasks: HashMap<String, (JoinHandle<()>, Arc<AtomicBool>, Receiver<u32>)>, // To keep track of running tasks
 }
 
@@ -31,7 +31,7 @@ impl TaskList {
         TaskList {
             front: None,
             length: 0,
-            name: input_name.to_string()
+            name: input_name.to_string(),
             active_tasks: HashMap::new(), // Initialize the hashmap here
         }
     }

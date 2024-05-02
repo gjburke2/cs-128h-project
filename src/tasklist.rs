@@ -6,12 +6,9 @@ use std::io::prelude::*;
 use std::io::LineWriter;
 use std::path::PathBuf;
 use dialoguer::Input;
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
-use std::thread::JoinHandle;
-use std::collections::HashMap;
+use std::sync::{Arc, atomic::{AtomicBool}};
 use std::time::Duration;
 use std::thread;
-use std::sync::{mpsc, mpsc::Receiver};
 
 #[derive(Clone)]
 pub struct TaskList {
@@ -38,9 +35,9 @@ impl TaskList {
         }
     }
     // Length getter
-    pub fn len(&self) -> usize {
+    /* pub fn len(&self) -> usize {
         self.length
-    }
+    } */
     pub fn get_mut_task_by_name(&mut self, name: &str) -> Option<&mut Task> {
         let mut current = &mut self.front;
         while let Some(node) = current {
@@ -52,7 +49,7 @@ impl TaskList {
         None
     }
     // Get mutable task by index contant (input will be one-indexed) {
-    pub fn get_mut_task(&mut self, index: usize) -> &mut Task {
+    /* pub fn get_mut_task(&mut self, index: usize) -> &mut Task {
         let mut curr = &mut self.front;
         let mut i = 1;
         while i < index {
@@ -60,7 +57,7 @@ impl TaskList {
             i += 1;
         }
         return &mut curr.as_mut().unwrap().task;
-    }
+    } */
     pub fn get_task(&self, index: usize) -> Task {
         let mut curr = &self.front;
         let mut i = 1;
@@ -119,7 +116,7 @@ impl TaskList {
         self.length += 1;
     }
     // Take task away (by name)
-    pub fn remove(&mut self, name: &str) -> Option<Task> {
+    /* pub fn remove(&mut self, name: &str) -> Option<Task> {
         if self.front.is_none() {
             return None;
         }
@@ -142,7 +139,7 @@ impl TaskList {
             current = &mut current.as_mut().unwrap().next;
         }
         return None;
-    }
+    } */
     // Saves to text file in lists folder
     pub fn save(&mut self) -> std::io::Result<()>{
         let mut path = PathBuf::new();
@@ -211,7 +208,7 @@ pub fn run() {
                 }
                 curr_list = TaskList::new(args[1]);
                 task_creator(&mut curr_list);
-                curr_list.save();
+                let _ = curr_list.save();
             },
             "load" => {
                 if args.len() != 2 {
@@ -263,7 +260,7 @@ pub fn run() {
                 let time: u64 = args[2].to_string().parse().expect("Has to be an unsigned integer!!");
                 thread::sleep(Duration::from_secs(time));
                 task.stop(handle1, rx1, should_stop.clone());
-                curr_list.save();
+                let _ = curr_list.save();
             },
             _ => {
                 println!("Invalid command.");

@@ -238,15 +238,25 @@ pub fn run() {
                     should_stop.store(true, Ordering::Relaxed);
                     handle.join().expect("Failed to join task thread");
                     if let Ok(time_left) = receiver.try_recv() {
-                        let task = curr_list.get_mut_task_by_name(task_name).unwrap();
-                        task.seconds_left = time_left;
-                        task.completion_status
-             {
-                println!("Invalid command");
+                        if let Some(task) = curr_list.get_mut_task_by_name(task_name) {
+                            task.seconds_left = time_left;
+                            task.completion_status = time_left == 0;
+                            println!("Task '{}' has been paused with {} seconds left.", task_name, time_left);
+                        }
+                    } else {
+                        println!("No time left information available for task '{}'.", task_name);
+                    }
+                } else {
+                    println!("Task '{}' is not currently running.", task_name);
+                }
+            },
+            _ => {
+                println!("Invalid command.");
             },
         }
     }
 }
+
 
 
 pub fn task_creator(task_list: &mut TaskList) {
